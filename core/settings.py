@@ -11,19 +11,18 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-
-
-
+import os
+import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-import environ
+# import environ
 
-env= environ.Env()
+# env= environ.Env()
 
-environ.Env.read_env()
+# environ.Env.read_env()
 
 
 
@@ -34,12 +33,17 @@ environ.Env.read_env()
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5(eplezf+c)0t=-ip^bph1+6m1-e78xaigp$z@e_#2xp_s$b@$'
+SECRET_KEY = os.environ.get('SECRET_KEY', default='django-insecure-5(eplezf+c)0t=-ip^bph1+6m1-e78xaigp$z@e_#2xp_s$b@$')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('https://64990c5ae8a773761bb0bd73--gilded-lokum-1d0dcd.netlify.app/login')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 # Application definition
@@ -66,7 +70,8 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'http://localhost:3001'
+    'http://localhost:3001',
+    'https://64990c5ae8a773761bb0bd73--gilded-lokum-1d0dcd.netlify.app'
 ]
 
 # DJOSER = {
@@ -110,14 +115,22 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-import dj_database_url
 
+## DATABASE_URL 
 DATABASES = {
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
-    'default': dj_database_url.parse(env('DATABASE_URL'))
+    # 'default': dj_database_url.parse(env('DATABASE_URL'))
+   
+    'default': dj_database_url.config(
+        # Feel free to alter this value to suit your needs.
+        # default='postgresql://postgres:postgres@localhost:5432/mysite',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+
 }
 
 
